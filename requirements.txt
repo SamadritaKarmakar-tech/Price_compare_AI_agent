@@ -1,0 +1,12 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+jinja2>=3.1
+openai>=1.30          # Gemini's OpenAI-compatible endpoint
+tavily-python>=0.5
+python-dotenv>=1.0
+# optional personalization memory (see README):
+mem0ai
+#for tests:
+pytest
+httpx

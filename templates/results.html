@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% macro offer_link(res, key, url, store) %}
+  {% if res.tracking and res.search_id %}
+    <a class="btn" href="/go/{{ res.search_id }}/{{ key }}" target="_blank" rel="noopener noreferrer">Open on {{ store }}</a>
+  {% elif url.startswith("https://") %}
+    <a class="btn" href="{{ url }}" target="_blank" rel="noopener noreferrer">Open on {{ store }}</a>
+  {% endif %}
+{% endmacro %}
+{% block title %}Results · Price Compare Agent{% endblock %}
+{% block content %}
+<p><a href="/">← New search</a></p>
+<p class="meta">Checked {{ res.checked_at }}. Prices come from search results and may differ on the store page.</p>
+{% if res.image and res.image.confidence == "low" %}<p class="note">The photo was hard to read, so these are rough matches.</p>{% endif %}
+<div class="note">{{ res.explanation }}</div>
+
+{% for p in res.products %}
+<article id="p-{{ p.key }}" class="{{ 'best' if loop.first else 'card' }}">
+  {% if loop.first %}<span class="tag">Best pick</span>{% endif %}
+  <div class="name">{{ p.name }}</div>
+  <div class="price">{{ p.price | inr }}</div>
+  <div class="meta">
+    {{ p.store }}{% if p.brand %} · {{ p.brand }}{% endif %}{% if p.variant %} · {{ p.variant }}{% endif %}
+    · {% if p.rating %}★ {{ p.rating }}{% if p.reviews %} ({{ p.reviews }} reviews){% endif %}{% else %}No rating found{% endif %}
+  </div>
+  {% if p.over_budget %}<div class="over">Over your budget</div>{% endif %}
+
+  {% if p.alternatives %}
+  <div class="offers">
+    {% for a in p.alternatives %}
+      <div class="offer">
+        <span>{{ a.store }}{% if a.rating %} · ★ {{ a.rating }}{% endif %}</span>
+        <span class="price small">{{ a.price | inr }}</span>
+        {{ offer_link(res, a.key, a.url, a.store) }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="actions">
+    {{ offer_link(res, p.key, p.url, p.store) }}
+    {% if res.tracking and res.search_id %}
+      <form method="post" action="/save" class="inline">{{ csrf_field }}
+        <input type="hidden" name="rid" value="{{ rid }}"><input type="hidden" name="key" value="{{ p.key }}">
+        <button type="submit">Save</button></form>
+    {% endif %}
+  </div>
+</article>
+{% endfor %}
+{% if not res.tracking %}<p class="meta">Want to save items and get personal suggestions? Turn on personalisation in <a href="/account">My account</a>.</p>{% endif %}
+{% endblock %}

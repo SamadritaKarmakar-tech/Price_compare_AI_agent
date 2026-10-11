@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Find the best price,<br>across stores.</h1>
+<p class="sub">Describe what you need or add a photo. We compare Amazon, Nykaa, Myntra and more.</p>
+
+{% if error %}<p class="err" role="alert">{{ error }}</p>{% endif %}
+{% if notice %}<p class="note">{{ notice }}</p>{% endif %}
+
+<form method="post" action="/search" enctype="multipart/form-data" class="card">
+  {{ csrf_field }}
+  <label class="sr" for="text">What do you want to buy?</label>
+  <textarea id="text" name="text" maxlength="500" placeholder="e.g. sunscreen for oily skin under ₹500">{{ q }}</textarea>
+  <div class="row">
+    <label class="meta" for="image">Photo (optional, JPEG/PNG/WebP, max 5 MB)</label>
+    <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp">
+    <span class="grow"></span>
+    <button class="primary" type="submit">Compare prices</button>
+  </div>
+</form>
+
+<section>
+  <h2>Ideas for you</h2>
+  {% if ideas or ai_ideas %}
+    <p class="chips">
+      {% for i in ideas + ai_ideas %}
+        <a class="chip" href="/?q={{ i.query | urlencode }}" title="{{ i.reason }}">{{ i.label }}</a>
+      {% endfor %}
+    </p>
+    <p class="meta">Click an idea to fill the search box.</p>
+  {% else %}
+    <p class="meta">Search a few things, or add preferences in <a href="/account">My account</a>, and ideas will appear here.</p>
+  {% endif %}
+  <form method="post" action="/suggestions/ai" class="inline">{{ csrf_field }}<button type="submit">Suggest ideas for me</button></form>
+</section>
+
+{% if saved %}
+<section>
+  <h2>Saved items</h2>
+  {% for s in saved %}
+    <div class="offer">
+      <span>
+        {% if s.url.startswith("https://") %}<a href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.name }}</a>{% else %}{{ s.name }}{% endif %}
+        <span class="meta"> · {{ s.store }} · {{ s.price | inr }}</span>
+      </span>
+      <form method="post" action="/unsave" class="inline">{{ csrf_field }}
+        <input type="hidden" name="search_id" value="{{ s.search_id }}"><input type="hidden" name="key" value="{{ s.product_key }}">
+        <button type="submit">Remove</button></form>
+    </div>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}

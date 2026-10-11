@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Price Compare Agent{% endblock %}</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main>
+{% if user %}
+  <nav class="topbar">
+    <a class="brand" href="/">Price Compare</a>
+    <span class="grow"></span>
+    <a href="/account">{{ user.name or user.email }}</a>
+    <form method="post" action="/logout" class="inline">{{ csrf_field }}<button type="submit">Log out</button></form>
+  </nav>
+{% endif %}
+{% if flash %}<p class="flash" role="status">{{ flash }}</p>{% endif %}
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

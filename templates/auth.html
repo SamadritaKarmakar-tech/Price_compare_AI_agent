@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ "Create account" if mode == "register" else "Log in" }} · Price Compare Agent{% endblock %}
+{% block content %}
+<div class="authbox">
+  <h1>Price Compare Agent</h1>
+  <p class="sub">Log in to keep your preferences and get suggestions made for you.</p>
+  <div class="card">
+    <div class="tabs">
+      <a class="btn {{ 'on' if mode == 'login' }}" href="/login">Log in</a>
+      <a class="btn {{ 'on' if mode == 'register' }}" href="/register">Create account</a>
+    </div>
+    {% if error %}<p class="err" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="/{{ mode }}">
+      {{ csrf_field }}
+      {% if mode == "register" %}
+        <label class="f" for="name">Name (optional)</label>
+        <input id="name" name="name" type="text" maxlength="60" autocomplete="name" value="{{ name or '' }}">
+      {% endif %}
+      <label class="f" for="email">Email</label>
+      <input id="email" name="email" type="email" required autocomplete="email" value="{{ email or '' }}">
+      <label class="f" for="password">Password{% if mode == "register" %} (8 or more characters){% endif %}</label>
+      <input id="password" name="password" type="password" required minlength="8" maxlength="128"
+             autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}">
+      {% if mode == "register" %}
+        <label class="check"><input type="checkbox" name="consent">
+          <span>Remember my searches and saved items to personalise suggestions. I can turn this off or delete my data any time.</span></label>
+      {% endif %}
+      <button class="primary wide" type="submit">{{ "Create account" if mode == "register" else "Log in" }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

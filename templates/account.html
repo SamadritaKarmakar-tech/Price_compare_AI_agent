@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}My account · Price Compare Agent{% endblock %}
+{% block content %}
+<h1>My account</h1>
+<p class="sub">{{ user.email }}</p>
+
+<section class="card">
+  <h2>My preferences</h2>
+  <p class="meta">Used to tailor results and suggestions. Leave a box empty to remove that preference.</p>
+  <form method="post" action="/account/preferences">
+    {{ csrf_field }}
+    <div class="grid">
+      {% for k, label in labels.items() %}
+        <div><label class="f" for="{{ k }}">{{ label }}</label>
+        <input id="{{ k }}" name="{{ k }}" type="text" maxlength="40" value="{{ profile.facts.get(k, '') }}"></div>
+      {% endfor %}
+    </div>
+    <p><button class="primary" type="submit">Save preferences</button></p>
+  </form>
+  {% if profile.categories or profile.brands or profile.typical_budget %}
+    <p class="meta">Learned from your activity:
+      {% if profile.categories %}often searched: {{ profile.categories[:3] | map(attribute=0) | join(", ") }}. {% endif %}
+      {% if profile.brands %}brands you engage with: {{ profile.brands[:3] | map(attribute=0) | join(", ") }}. {% endif %}
+      {% if profile.typical_budget %}typical budget: {{ profile.typical_budget | inr }}.{% endif %}
+    </p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Personalisation</h2>
+  <p>{% if user.consent %}On. We remember your searches, clicks and saved items to improve suggestions.
+     {% else %}Off. Nothing is tracked, and saving items is unavailable.{% endif %}</p>
+  <form method="post" action="/account/consent" class="inline">{{ csrf_field }}
+    <button type="submit" name="choice" value="{{ 'off' if user.consent else 'on' }}">{{ "Turn off" if user.consent else "Turn on" }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Your data</h2>
+  <p><a class="btn" href="/account/export">Download my data (JSON)</a></p>
+  <form method="post" action="/account/clear">{{ csrf_field }}
+    <label class="check"><input type="checkbox" name="confirm" value="yes" required>
+      <span>Clear my search history, saved items and preferences. My account stays.</span></label>
+    <button type="submit">Clear my history</button>
+  </form>
+</section>
+
+<section class="card danger">
+  <h2>Delete account</h2>
+  {% if delete_error %}<p class="err" role="alert">{{ delete_error }}</p>{% endif %}
+  <form method="post" action="/account/delete">{{ csrf_field }}
+    <label class="f" for="pw">Confirm your password</label>
+    <input id="pw" name="password" type="password" required autocomplete="current-password">
+    <label class="check"><input type="checkbox" name="confirm" value="yes" required>
+      <span>Permanently delete my account and all my data.</span></label>
+    <button type="submit">Delete my account</button>
+  </form>
+</section>
+{% endblock %}
